@@ -1,42 +1,38 @@
 #include "Powerbaas.h"
 
-void Powerbaas::disableDebug() {
-  _debug = false;
-}
-
 void Powerbaas::setup() {
 
-  if(_debug) {
+  if(_loggingEnabled) {
     Serial.println("");
     Serial.println("====================");
     Serial.println("Powerbaas setup:");
   }
 
   // try 3 different settings
-  for(int i = 0; i < 3; i++) {
+  for (int serialMode = 0; serialMode < 3; serialMode++) {
 
-    if(_debug) {
+    if(_loggingEnabled) {
       Serial.println("");
       Serial.print(" > try serial mode ");
-      Serial.println(i+1);
+      Serial.println(serialMode+1);
       Serial.print("   ");
     }
 
-    _smartMeterAdapter.setupSerialAndBaudrate();
+    _smartMeterAdapter.setupSerialAndBaudrate(serialMode);
 
     // try for 15 seconds
-    for(int j = 0; j < 15; j++) {
+    for(int seconds = 0; seconds < 15; seconds++) {
 
-      if(_debug) {
+      if(_loggingEnabled) {
         Serial.print(".");
       }
 
-      _smartMeterAdapter.receive();
+      _smartMeterAdapter.receive(_onMeterReading);
 
       // we got readable data!
       if(_smartMeterAdapter.isReceiving()) {
 
-        if(_debug) {
+        if(_loggingEnabled) {
           Serial.println("");
           Serial.println(" > setup complete!");
           Serial.println("====================");
@@ -50,14 +46,13 @@ void Powerbaas::setup() {
   }
 
   // failed!
-  if(_debug) {
+  if(_loggingEnabled) {
     Serial.println("");
     Serial.println(" > setup failed!");
     Serial.println("====================");
   }
 }
 
-MeterReading Powerbaas::getMeterReading() {
-  _smartMeterAdapter.receive();
-  return _meterReading;
+void Powerbaas::receive() {
+  _smartMeterAdapter.receive(_onMeterReading);
 }

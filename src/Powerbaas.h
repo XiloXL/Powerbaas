@@ -8,17 +8,26 @@
 
 class Powerbaas {
   public:
-    Powerbaas(): _smartMeterAdapter(Serial2, _smartMeterLineParser, _meterReading) {}
+    Powerbaas(bool loggingEnabled):
+      _loggingEnabled(loggingEnabled),
+      _smartMeterAdapter(Serial2, _smartMeterLineParser, _meterReading),
+      _onMeterReading([](const MeterReading& meterReading) {})
+    {}
 
     void setup();
-    void disableDebug();
-    MeterReading getMeterReading();
+    void receive();
+
+    void onMeterReading(const MeterReadingCallback& onMeterReading) {
+        _onMeterReading = onMeterReading;
+    }
 
   private:
-    bool _debug = true;
+    bool _loggingEnabled;
     MeterReading _meterReading{0,0,0,0,0,0};
     SmartMeterLineParser _smartMeterLineParser;
-    SmartMeterAdapter _smartMeterAdapter;//(Serial2, _smartMeterLineParser, _meterReading)
+    SmartMeterAdapter _smartMeterAdapter;
+
+    MeterReadingCallback _onMeterReading;
 };
 
 #endif

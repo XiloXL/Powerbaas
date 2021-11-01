@@ -7,6 +7,12 @@
 #include "MeterReading.h"
 #include "SmartMeterLineParser.h"
 
+enum class SmartMeterState {
+   idle,
+   settingUpSerial,
+   receiving
+};
+
 class SmartMeterAdapter {
   public:
     SmartMeterAdapter(
@@ -19,9 +25,9 @@ class SmartMeterAdapter {
       _meterReading(meterReading)
     {}
 
-    void receive();
-    void setupSerialAndBaudrate();
-    bool isReceiving() { return _serialIsReceiving; };
+    void receive(const MeterReadingCallback& onMeterReading);
+    void setupSerialAndBaudrate(uint8_t serialMode);
+    bool isReceiving() { return _state == SmartMeterState::receiving; };
 
   private:
 
@@ -29,14 +35,13 @@ class SmartMeterAdapter {
     SmartMeterLineParser& _smartMeterLineParser;
     MeterReading& _meterReading;
     
-    char _lastReceivedCharacter;
+    char _lastTelegramCharacter;
     char _telegramLine[TELEGRAM_LINE_SIZE];
-    size_t _dataIndex = 0;
+    size_t _telegramIndex = 0;
 
     // detect baudrate and check receiving data correct
     uint8_t _serialMode = 1;
-    bool _isSettingUpSerial = true;
-    bool _serialIsReceiving = false;
+    SmartMeterState _state{SmartMeterState::idle};
 };
 
 #endif

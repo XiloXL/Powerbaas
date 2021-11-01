@@ -27,7 +27,7 @@ void Powerbaas::setup() {
         Serial.print(".");
       }
 
-      _smartMeterAdapter.receive();
+      _smartMeterAdapter.receive(_onMeterReading);
 
       // we got readable data!
       if(_smartMeterAdapter.isReceiving()) {
@@ -53,7 +53,6 @@ void Powerbaas::setup() {
   }
 }
 
-MeterReading Powerbaas::getMeterReading() {
-  _smartMeterAdapter.receive();
-  return _meterReading;
+void Powerbaas::receive() {
+  _smartMeterAdapter.receive(_onMeterReading);
 }

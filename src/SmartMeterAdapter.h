@@ -25,7 +25,7 @@ class SmartMeterAdapter {
       _meterReading(meterReading)
     {}
 
-    void receive();
+    void receive(const MeterReadingCallback& onMeterReading);
     void setupSerialAndBaudrate(uint8_t serialMode);
     bool isReceiving() { return _state == SmartMeterState::receiving; };
 

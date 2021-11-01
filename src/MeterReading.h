@@ -2,6 +2,7 @@
 #define __METER_READING_H__
 
 #include <stdint.h>
+#include <functional>
 
 struct MeterReading {
   // this is the amount of power you are currently using, negative if you return to the net, positive if you use from the net
@@ -18,5 +19,7 @@ struct MeterReading {
   // the amount of gas you are using from the net
   uint32_t gas;
 };
+
+typedef std::function<void(const MeterReading&)> MeterReadingCallback;
 
 #endif

@@ -26,7 +26,7 @@ void SmartMeterAdapter::setupSerialAndBaudrate(uint8_t serialMode) {
   _state = SmartMeterState::idle;
 }
 
-void SmartMeterAdapter::receive() {
+void SmartMeterAdapter::receive(const MeterReadingCallback& onMeterReading) {
 
   if (_state == SmartMeterState::settingUpSerial) {
     return;
@@ -51,9 +51,10 @@ void SmartMeterAdapter::receive() {
 
       // Message ends with !
       if (_telegramLine[0] == '!') {
-
         // Data readable!
         _state = SmartMeterState::receiving;
+
+        onMeterReading(_meterReading);
       }
 
       // Empty buffer again (whole array)

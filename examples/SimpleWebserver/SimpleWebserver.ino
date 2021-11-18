@@ -66,11 +66,11 @@ String indexHtml() {
   <title>PowerBaas</title>
   <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
     body{margin-top: 20px;} h3 {color: #2d2d2d;margin-bottom: 10px margin-top:50px;}
-    .button {display: inline-block;width: 100px;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
-    .button-small{width:40px; display:inline-block;}
-    .button-on {background-color: #38b54a;}
-    .button-off {background-color: #2d2d2d;}
-    .button-action {background-color: #ece50a;}
+    .card {display: inline-block;width: 100px;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
+    .card-small{width:40px; display:inline-block;}
+    .card-on {background-color: #38b54a;}
+    .card-off {background-color: #2d2d2d;}
+    .card-action {background-color: #ece50a;}
     p {font-size: 14px;color: #2d2d2d;margin-bottom: 10px;}
   </style>
   </head>
@@ -80,21 +80,21 @@ String indexHtml() {
 
   // Current power usage
   ptr += "<h3>Current power usage</h3>\n";
-  ptr += "<a class=\"button button-on\" href=\"#\">" + String(meterReading.powerUsage) + " Watt</a>\n";
+  ptr += "<div class=\"card card-on\">" + String(meterReading.powerUsage) + " Watt</div>\n";
 
   // Power used
   ptr += "<h3>Power used from grid</h3>\n";
-  ptr += "<a class=\"button button-off\" href=\"#\">" + String(meterReading.powerDeliverHigh) + "</a>\n";
-  ptr += "<a class=\"button button-off\" href=\"#\">" + String(meterReading.powerDeliverLow) + "</a>\n";
+  ptr += "<div class=\"card card-off\">" + String(meterReading.powerDeliverHigh) + "</div>\n";
+  ptr += "<div class=\"card card-off\">" + String(meterReading.powerDeliverLow) + "</div>\n";
 
   // Power returned
   ptr += "<h3>Power returned to grid</h3>\n";
-  ptr += "<a class=\"button button-off\" href=\"#\">" + String(meterReading.powerReturnHigh) + "</a>\n";
-  ptr += "<a class=\"button button-off\" href=\"#\">" + String(meterReading.powerReturnLow) + "</a>\n";
+  ptr += "<div class=\"card card-off\">" + String(meterReading.powerReturnHigh) + "</div>\n";
+  ptr += "<div class=\"card card-off\">" + String(meterReading.powerReturnLow) + "</div>\n";
 
   // Gas used
   ptr += "<h3>Gas used</h3>\n";
-  ptr += "<a class=\"button button-off\" href=\"#\">" + String(meterReading.gas) + "</a>\n";
+  ptr += "<div class=\"card card-off\">" + String(meterReading.gas) + "</div>\n";
 
   ptr += "</body>\n";
   ptr += "</html>\n";

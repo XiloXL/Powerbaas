@@ -13,3 +13,10 @@ With this shield and library you are able to:
 - Read power imported from grid during peak hours
 - Read power imported from grid during off-peak hours
 - Read gas used
+
+## Added in version 1.0.1
+- Webserver example
+
+## Next release
+- 433MHz transmitter support
+- Klik-Aan-Klik-Uit (KAKU) devices 

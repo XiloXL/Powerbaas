@@ -23,7 +23,8 @@ WiFiClient client;
 
 Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, MQTT_KEY);
 
-Adafruit_MQTT_Publish telegramChannel = Adafruit_MQTT_Publish(&mqtt, "telegram/usage");
+// Only usage is published in a channel
+Adafruit_MQTT_Publish mqttChannel = Adafruit_MQTT_Publish(&mqtt, "telegram/usage");
 
 Powerbaas powerbaas(true);
 MeterReading meterReading;
@@ -43,9 +44,7 @@ void loop() {
   
   currentMilis = millis();
   if (currentMilis - lastUpdateMilis > 1000) {
-    Serial.println("MQTT");
-    
-    telegramChannel.publish(meterReading.powerUsage);  
+    mqttChannel.publish(meterReading.powerUsage);  
     
     lastUpdateMilis = currentMilis;
   }

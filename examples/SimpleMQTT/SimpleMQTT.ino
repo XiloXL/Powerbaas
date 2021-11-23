@@ -2,22 +2,34 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
+/**
+ * This example is based on the AdaFruit MQTT client which should be installed
+ * for the code to be compiled. There should be a working MQTT broker available.
+ */ 
+
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
+
+/**
+ * Insert your wifi ssid and password here.
+ */
 
 const char* ssid = "";
 const char* password = "";
 
 /**
- * This example is based on the AdaFruit MQTT client which should be installed
- * for the code to be compiled. There should be a working MQTT broker available.
- * 
- */ 
+ * Perform every x-milliseconds
+ */
+
+int interval = 1000;
+int lastUpdateMillis = 0;
+int currentMillis = 0;
 
 #define MQTT_SERVER      ""   // ex. hostname.com
 #define MQTT_SERVERPORT  1883 // use 8883 for SSL
 #define MQTT_USERNAME    ""
 #define MQTT_KEY         ""
+
 
 WiFiClient client;
 
@@ -34,19 +46,16 @@ void setup() {
   setupPowerbaas();
 }
 
-int lastUpdateMilis = 0;
-int currentMilis = 0;
-
 void loop() {
   MQTT_connect();
   
   powerbaas.receive();
   
-  currentMilis = millis();
-  if (currentMilis - lastUpdateMilis > 1000) {
+  currentMillis = millis();
+  if (currentMillis - lastUpdateMillis > interval) {
     mqttChannel.publish(meterReading.powerUsage);  
     
-    lastUpdateMilis = currentMilis;
+    lastUpdateMillis = currentMillis;
   }
 }
 

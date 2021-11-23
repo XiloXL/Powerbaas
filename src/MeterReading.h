@@ -18,6 +18,17 @@ struct MeterReading {
 
   // the amount of gas you have used from the net
   uint32_t gas;
+
+  // voltages
+  uint16_t voltageL1;
+  uint16_t voltageL2;
+  uint16_t voltageL3;
+
+  // current
+  uint8_t currentL1;
+  uint8_t currentL2;
+  uint8_t currentL3;
+
 };
 
 typedef std::function<void(const MeterReading&)> MeterReadingCallback;

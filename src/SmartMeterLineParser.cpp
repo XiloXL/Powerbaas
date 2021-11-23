@@ -41,6 +41,34 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
     }
   }
 
+  // 1-0:32.7.0 = voltage on L1 (is also the line on single phase)
+  else if (sscanf(line, "1-0:32.7.0(%f", &result) == 1) {
+    meterReading.voltageL1 = result*10;
+  }
+  // 1-0:52.7.0 = voltage on L2 
+  else if (sscanf(line, "1-0:52.7.0(%f", &result) == 1) {
+    meterReading.voltageL2 = result*10;
+  }
+  // 1-0:72.7.0 = voltage on L3
+  else if (sscanf(line, "1-0:72.7.0(%f", &result) == 1) {
+    meterReading.voltageL3 = result*10;
+  }
+
+  // 1-0:31.7.0 = Current on L1
+  else if (sscanf(line, "1-0:31.7.0(%f", &result) == 1) {
+    meterReading.currentL1 = result;
+  }
+
+  // 1-0:51.7.0 = Current on L2
+  else if (sscanf(line, "1-0:51.7.0(%f", &result) == 1) {
+    meterReading.currentL2 = result;
+  }
+
+  // 1-0:71.7.0 = Current on L3
+  else if (sscanf(line, "1-0:71.7.0(%f", &result) == 1) {
+    meterReading.currentL3 = result;
+  }
+
   // 0-1:24.2.1 = Gas Summer
   else if (sscanf(line, "0-1:24.2.1(%ldS)(%f*m3", &discardGas, &result) == 2) {
     meterReading.gas = resultToInt(result);

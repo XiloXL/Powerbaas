@@ -17,6 +17,9 @@ With this shield and library you are able to:
 ## Added in version 1.0.1
 - Webserver example
 
+## Added in version 1.0.2
+- MQTT example
+
 ## Next release
 - 433MHz transmitter support
 - Klik-Aan-Klik-Uit (KAKU) devices 

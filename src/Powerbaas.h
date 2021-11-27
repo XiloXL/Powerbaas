@@ -2,9 +2,15 @@
 #define __POWERBAAS_H__
 
 #include <HardwareSerial.h>
-#include "MeterReading.h"
-#include "SmartMeterAdapter.h"
-#include "SmartMeterLineParser.h"
+
+#include "MeterReading/MeterReading.h"
+#include "MeterReading/SmartMeterAdapter.h"
+#include "MeterReading/SmartMeterLineParser.h"
+
+#include "System/SystemTime.h"
+#include "System/Timer.h"
+
+#include "Condition/ConditionMachine.h"
 
 class Powerbaas {
   public:

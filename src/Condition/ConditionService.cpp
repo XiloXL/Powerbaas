@@ -1,6 +1,5 @@
 #include "ConditionService.h"
 #include "FS.h"
-#include "SPIFFS.h"
 
 bool ConditionService::storeConditionDevices() {
 

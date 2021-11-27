@@ -10,7 +10,10 @@
 #include "System/SystemTime.h"
 #include "System/Timer.h"
 
+#include "NewRemoteSwitch/NewRemoteTransmitter.h"
+
 #include "Condition/ConditionMachine.h"
+#include "Condition/ConditionService.h"
 
 class Powerbaas {
   public:

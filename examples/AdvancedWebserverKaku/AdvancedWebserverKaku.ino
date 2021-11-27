@@ -4,21 +4,26 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <uri/UriBraces.h>
-#include "NewRemoteSwitch/NewRemoteTransmitter.h"
 
-const char* ssid = "YOUR-SSID";
-const char* password = "YOUR-PASSWORD";
+const char* ssid = "YOUR-SSID"; // TODO REMOVE!
+const char* password = "YOUR-PASSWORD"; // TODO REMOVE!
 
 Powerbaas powerbaas(true);
 MeterReading meterReading;
 WebServer server(80);
-std::unordered_map<uint8_t, ConditionDevice> devices;
+Timer timer1;
+ConditionService conditionService;
 
 void setup() {
   Serial.begin(115200);
+  delay(3000);
+  if(!SPIFFS.begin(true)){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+  }
   //setupPowerbaas(); // TODO REMOVE!
   setupWebserver();
   setupEndpoints();
+  setupConditionMachine();
 }
 
 void setupPowerbaas() {
@@ -60,24 +65,28 @@ void setupEndpoints() {
   // edit switch form
   server.on(UriBraces("/switch/edit/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     server.send(200, "text/html", editSwitch(device));
   });
   // edit switch form
   server.on(UriBraces("/switch/delete/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     server.send(200, "text/html", deleteSwitch(device));
   });
   // pair mode form
   server.on(UriBraces("/switch/pair/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     server.send(200, "text/html", pairSwitch(device));
   });
   // pair mode form
   server.on(UriBraces("/handle/switch/pair/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     server.send(200, "text/html", pairSwitchHandler(device));
     handleSwitchPair(device);
@@ -93,6 +102,7 @@ void setupEndpoints() {
   server.on(UriBraces("/handle/switch/edit"), []() {
     String switchId = server.arg("id");
     String name = server.arg("name");
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     handleSwitchEdit(device, name);
     server.send(200, "text/html", redirect());
@@ -100,6 +110,7 @@ void setupEndpoints() {
   // handle delete switch form
   server.on(UriBraces("/handle/switch/delete/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     handleSwitchDelete(device);
     server.send(200, "text/html", redirect());
@@ -107,6 +118,7 @@ void setupEndpoints() {
   // turn switch on
   server.on(UriBraces("/handle/switch/on/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     handleSwitchOn(device);
     server.send(200, "text/html", redirect());
@@ -114,12 +126,19 @@ void setupEndpoints() {
   // turn switch off
   server.on(UriBraces("/handle/switch/off/{}"), []() {
     String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
     handleSwitchOff(device);
     server.send(200, "text/html", redirect());
   });
 
   server.begin();
+}
+
+void setupConditionMachine() {
+
+  conditionService.loadConditionDevices();
+  // timer1.eachSecond.conditionMachine.run();
 }
 
 void loop() {
@@ -139,15 +158,20 @@ void handleSwitchAdd(String name) {
   strcpy(device.name, name.c_str());
   device.state = DEVICE_OFF;
   device.type = DEVICE_SWITCH;
+  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
   devices[device.id] = device;
+  conditionService.storeConditionDevices();
 }
 
 void handleSwitchEdit(ConditionDevice& device, String name) {
   strcpy(device.name, name.c_str());
+  conditionService.storeConditionDevices();
 }
 
 void handleSwitchDelete(ConditionDevice& device) {
+  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
   devices.erase(device.id);
+  conditionService.storeConditionDevices();
 }
 
 void handleSwitchOn(ConditionDevice& device) {
@@ -183,6 +207,7 @@ String index() {
 
   // Switch
   body += "<h3>Smart Switches</h3>\n";
+  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
   for (auto& deviceElement: devices) {
     ConditionDevice& device = deviceElement.second;
     if(device.state == DEVICE_ON) {

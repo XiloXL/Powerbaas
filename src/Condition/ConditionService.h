@@ -3,6 +3,7 @@
 
 #include "Condition.h"
 #include <WString.h>
+#include "SPIFFS.h"
 
 class ConditionService {
 public:
@@ -18,9 +19,9 @@ public:
 private:
   std::unordered_map<uint8_t, ConditionDevice> _devices;
 
-  String _devicesFile = "devices.csv";
-  String _actionsFile = "actions.csv";
-  String _rulesFile = "rules.csv";
+  String _devicesFile = "/devices.csv";
+  String _actionsFile = "/actions.csv";
+  String _rulesFile = "/rules.csv";
 
   // for storing
   String conditionDeviceStructToCsv(ConditionDevice& device) const;

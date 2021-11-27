@@ -6,8 +6,8 @@
 #include <uri/UriBraces.h>
 #include "NewRemoteSwitch/NewRemoteTransmitter.h"
 
-const char* ssid = "XiloBeneden"; //"YOUR-SSID";
-const char* password = "gerardisbruut"; //"YOUR-PASSWORD";
+const char* ssid = "YOUR-SSID";
+const char* password = "YOUR-PASSWORD";
 
 Powerbaas powerbaas(true);
 MeterReading meterReading;
@@ -16,7 +16,7 @@ std::unordered_map<uint8_t, ConditionDevice> devices;
 
 void setup() {
   Serial.begin(115200);
-  //setupPowerbaas();
+  //setupPowerbaas(); // TODO REMOVE!
   setupWebserver();
   setupEndpoints();
 }
@@ -185,9 +185,6 @@ String index() {
   body += "<h3>Smart Switches</h3>\n";
   for (auto& deviceElement: devices) {
     ConditionDevice& device = deviceElement.second;
-//    if(device.id == 0) {
-//      continue;
-//    }
     if(device.state == DEVICE_ON) {
       body += "<a href=\"/switch/edit/" + String(device.id) + "\" class=\"card card-on\">" + String(device.name) + "</a>\n";
     }

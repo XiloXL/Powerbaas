@@ -5,8 +5,8 @@
 #include <ESPmDNS.h>
 #include <uri/UriBraces.h>
 
-const char* ssid = "YOUR-SSID"; // TODO REMOVE!
-const char* password = "YOUR-PASSWORD"; // TODO REMOVE!
+const char* ssid = "YOUR-SSID";
+const char* password = "YOUR-PASSWORD";
 
 Powerbaas powerbaas(true);
 MeterReading meterReading;
@@ -131,6 +131,21 @@ void setupEndpoints() {
     handleSwitchOff(device);
     server.send(200, "text/html", redirect());
   });
+  // update switch conditions
+  server.on(UriBraces("/handle/switch/conditions/{}"), []() {
+    String switchId = server.pathArg(0);
+    std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
+    ConditionDevice& device = devices[switchId.toInt()];
+    String onTime = server.arg("on_time");
+    String onSurplus = server.arg("on_surplus");
+    String onDuration = server.arg("on_duration");
+    String offTime = server.arg("off_time");
+    String offShortage = server.arg("off_shortage");
+    String offDuration = server.arg("off_duration");
+    handleSwitchConditions(device, onTime, onSurplus, onDuration, offTime, offShortage, offDuration);
+    server.send(200, "text/html", redirect());
+  });
+
 
   server.begin();
 }
@@ -194,6 +209,14 @@ void handleSwitchPair(ConditionDevice& device) {
     delay(900);
   }
 }
+void handleSwitchConditions(ConditionDevice& device, String onTime, String onSurplus, String onDuration, String offTime, String offShortage, String offDuration) {
+  Serial.println(onTime);
+  Serial.println(onSurplus);
+  Serial.println(onDuration);
+  Serial.println(offTime);
+  Serial.println(offShortage);
+  Serial.println(offDuration);
+}
 
 
 
@@ -235,21 +258,65 @@ String addSwitch() {
 
 String editSwitch(ConditionDevice& device) {
 
+  // edit name
   String body = "<h3>Edit Smart Switch " + String(device.name) + " (" + String(device.id) + ") </h3>\n";
   body += "<form action=\"/handle/switch/edit\" method=\"GET\">\n";
   body += "<input type=\"hidden\" name=\"id\" value=\"" + String(device.id) + "\">";
   body += "<div>Name:</div><div><input type=\"text\" value=\"" + String(device.name) + "\" name=\"name\"></div>\n";
   body += "<div><input type=\"submit\" /></div>\n";
   body += "</form>";
+
+  // turn of/of, pair, delete
   body += "<h3>Actions</h3>";
   if(device.state == DEVICE_ON) {
-    body += "<a href=\"/handle/switch/off/" + String(device.id) + "\" class=\"card card-on\">Turn Off</a>\n";
+    body += "<a href=\"/handle/switch/off/" + String(device.id) + "\" class=\"card card-on\">Off</a>\n";
   }
   else if(device.state == DEVICE_OFF) {
-    body += "<a href=\"/handle/switch/on/" + String(device.id) + "\" class=\"card card-off\">Turn On</a>\n";
+    body += "<a href=\"/handle/switch/on/" + String(device.id) + "\" class=\"card card-off\">On</a>\n";
   }
   body += "<a href=\"/switch/pair/" + String(device.id) + "\" class=\"card card-action\">Pair</a>\n";
   body += "<a href=\"/switch/delete/" + String(device.id) + "\" class=\"card card-red\">Delete</a>\n";
+
+  // turn device on at time
+  body += "<form action=\"/handle/switch/conditions/" + String(device.id) + "\" method=\"GET\">\n";
+  body += "<hr /><h3>Turn device on</h3>\n";
+
+  body += "<table><tr>\n";
+  body += "<td>Turn device on at time:</td></tr><tr>\n";
+  body += "<td><input name=\"on_time\" type=\"range\" value=\"0\" min=\"0\" max=\"24\" oninput=\"document.getElementById('on_time').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_time\">0</output> hour</td></tr>\n";
+
+  // when there is solar surplus of:
+  body += "<tr><td>When there is solar surplus of:</td></tr><tr>\n";
+  body += "<td><input name=\"on_surplus\" type=\"range\" value=\"0\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('on_surplus').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_surplus\">0</output> watts</td></tr>\n";
+
+  // for a duration of:
+  body += "<tr><td>For a duration of:</td></tr><tr>\n";
+  body += "<td><input name=\"on_duration\" type=\"range\" value=\"0\" min=\"0\" max=\"300\" oninput=\"document.getElementById('on_duration').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_duration\">0</output> sec</td></tr></table>\n";
+
+
+  // turn device off conditions
+  body += "<hr /><h3>Turn device off</h3>\n";
+  body += "<table><tr>\n";
+  body += "<td>Turn device off at time:</td></tr><tr>\n";
+  body += "<td><input name=\"off_time\" type=\"range\" value=\"0\" min=\"0\" max=\"24\" oninput=\"document.getElementById('off_time').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_time\">0</output> hour</td></tr>\n";
+
+  // when there is power shortage  of:
+  body += "<tr><td>When there is power shortage of:</td></tr><tr>\n";
+  body += "<td><input name=\"off_shortage\" type=\"range\" value=\"0\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('off_shortage').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_shortage\">0</output> watts</td></tr>\n";
+
+  // for a duration of:
+  body += "<tr><td>For a duration of:</td></tr><tr>\n";
+  body += "<td><input name=\"off_duration\" type=\"range\" value=\"0\" min=\"0\" max=\"300\" oninput=\"document.getElementById('off_duration').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_duration\">0</output> sec</td></tr></table><hr />\n";
+  body += "<input type=\"submit\" /></div>\n";
+  body += "<br /><br /><br /><br /><br />\n";
+  body += "</div>\n";
+  body += "</form>\n";
 
   return html(body);
 }
@@ -320,7 +387,7 @@ String html(String body) {
   <title>PowerBaas</title>
   <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
     body{margin-top: 20px;} h3 {color: #2d2d2d;margin-bottom: 10px margin-top:50px;}
-    .card {display: inline-block;width: 100px;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
+    .card {display: inline-block;width: 80px; background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
     .card-small{width:40px; display:inline-block;}
     .card-on {background-color: #38b54a;}
     .card-off {background-color: #2d2d2d;}
@@ -330,6 +397,9 @@ String html(String body) {
     p {font-size: 14px;color: #2d2d2d;margin-bottom: 10px;}
     input { padding:10px; border-radius:10px; border:1px solid #cccccc; }
     input[type=submit] { margin-top:25px; }
+    input[type=range] { width:300px; }
+    td { text-align:left; }
+    table { width:90%; max-width:440px; margin-left: auto;margin-right: auto; }
   </style>
   </head>
   <body>

@@ -3,6 +3,7 @@
 
 #include "../System/SystemTime.h"
 #include "../MeterReading/MeterReading.h"
+#include "../Condition/ConditionService.h"
 #include "../Condition/ConditionRule/ConditionRuleOversupply.h"
 #include "../Condition/ConditionRule/ConditionRuleShortage.h"
 #include "../Condition/ConditionRule/ConditionRuleTime.h"
@@ -10,7 +11,8 @@
 
 class ConditionMachine {
 public:
-  ConditionMachine(MeterReading& meterReading, SystemTime& systemTime):
+  ConditionMachine(ConditionService& conditionService, MeterReading& meterReading, SystemTime& systemTime):
+    _conditionService(conditionService),
     _meterReading(meterReading),
     _systemTime(systemTime),
     _conditionRuleTime(ConditionRuleTime(systemTime)),
@@ -23,7 +25,8 @@ public:
   void run();
 
 private:
-  std::unordered_map<uint8_t, ConditionDevice> _devices;
+
+  ConditionService& _conditionService;
   uint32_t _currentMillis = 0;
   MeterReading& _meterReading;
   SystemTime& _systemTime;

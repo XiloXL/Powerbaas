@@ -1,15 +1,16 @@
 #include "ConditionMachine.h"
 
-void ConditionMachine::setup(std::unordered_map<uint8_t, ConditionDevice> devices) {
-  _devices = devices;
-}
-
 void ConditionMachine::run() {
 
   _currentMillis = millis();
 
-  for (auto& device_element: _devices) {
+  for (auto& device_element: _conditionService.getConditionDevices()) {
     ConditionDevice& device = device_element.second;
+
+    // empty device, next!
+    if(device.id == 0) {
+      continue;
+    }
 
     // disabled, next!
     if(device.enabled != DEVICE_ENABLED) {

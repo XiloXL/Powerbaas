@@ -10,9 +10,11 @@ const char* password = "YOUR-PASSWORD";
 
 Powerbaas powerbaas(true);
 MeterReading meterReading;
+SystemTime systemTime;
 WebServer server(80);
 Timer timer1;
 ConditionService conditionService;
+ConditionMachine conditionMachine(conditionService, meterReading, systemTime);
 
 void setup() {
   Serial.begin(115200);
@@ -20,8 +22,9 @@ void setup() {
   if(!SPIFFS.begin(true)){
     Serial.println("An Error has occurred while mounting SPIFFS");
   }
-  //setupPowerbaas(); // TODO REMOVE!
+  setupPowerbaas();
   setupWebserver();
+  setupSystemTime();
   setupEndpoints();
   setupConditionMachine();
 }
@@ -51,6 +54,23 @@ void setupWebserver() {
   Serial.print("Connect to webserver: http://");
   Serial.println(WiFi.localIP());
 }
+
+void setupSystemTime() {
+  systemTime.syncWithNTP();
+
+  //loop 1 every hour, start 2 seconds later
+  timer1.runEvery(3600000, 2000, [](){
+    systemTime.syncWithNTP();
+  });
+}
+
+void setupConditionMachine() {
+  // loop 1 every second
+  timer1.runEvery(1000, 0, []() {
+    conditionMachine.run();
+  });
+}
+
 
 void setupEndpoints() {
 
@@ -150,13 +170,8 @@ void setupEndpoints() {
   server.begin();
 }
 
-void setupConditionMachine() {
-
-  conditionService.loadConditionDevices();
-  // timer1.eachSecond.conditionMachine.run();
-}
-
 void loop() {
+  timer1.update();
   powerbaas.receive();
   server.handleClient();
 }
@@ -173,6 +188,7 @@ void handleSwitchAdd(String name) {
   strcpy(device.name, name.c_str());
   device.state = DEVICE_OFF;
   device.type = DEVICE_SWITCH;
+  device.enabled = DEVICE_ENABLED;
   std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
   devices[device.id] = device;
   conditionService.storeConditionDevices();

@@ -39,22 +39,22 @@
 #define CONDITION_LESS_THAN 3           // Condition value mest be less than
 
 struct ConditionDeviceActionRule {
-  uint32_t deviceId;                    // => Foreign key to device
-  uint8_t actionId;                     // => Foreign key to action
-  uint8_t type;                         // => Oversupply
-  uint8_t condition;                    // => Greater than
-  uint32_t value;                       // => Watt/milliseconds/etc
-  uint32_t threshold;                   // => Amount of time condition must be met in millis()
-  uint32_t thresholdOffset;             // => Time condition first met in millis()
-  uint8_t targetDeviceId;               // => Specific device, bv TemperatureDevice living room
+  uint32_t deviceId = 0;                // => Foreign key to device
+  uint8_t actionId = 0;                 // => Foreign key to action
+  uint8_t type = 0;                     // => Oversupply
+  uint8_t condition = 0;                // => Greater than
+  uint32_t value = 0;                   // => Watt/milliseconds/etc
+  uint32_t threshold = 0;               // => Amount of time condition must be met in millis()
+  uint32_t thresholdOffset = 0;         // => Time condition first met in millis()
+  uint8_t targetDeviceId = 0;           // => Specific device, bv TemperatureDevice living room
 };
 
 struct ConditionDeviceAction {
-  uint8_t id;                           // => Unique increment
-  uint32_t deviceId;                    // => Foreign key to device
-  uint8_t type;                         // => On/Off/Request
-  uint32_t activeFrom;                  // => Active from in GMT
-  uint32_t activeUntil;                 // => Active until in GMT
+  uint8_t id = 0;                       // => Unique increment
+  uint32_t deviceId = 0;                // => Foreign key to device
+  uint8_t type = 0;                     // => On/Off/Request
+  uint32_t activeFrom = 0;              // => Active from in GMT
+  uint32_t activeUntil = 0;             // => Active until in GMT
   std::vector<ConditionDeviceActionRule> rules;
 };
 

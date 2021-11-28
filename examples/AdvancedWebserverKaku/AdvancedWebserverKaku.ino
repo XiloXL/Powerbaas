@@ -171,6 +171,7 @@ void setupEndpoints() {
     String offShortage = server.arg("off_shortage");
     String offDuration = server.arg("off_duration");
     handleSwitchConditions(device, onTime, onSurplus, onDuration, offTime, offShortage, offDuration);
+
     server.send(200, "text/html", redirect());
   });
 
@@ -233,13 +234,116 @@ void handleSwitchPair(ConditionDevice& device) {
     delay(900);
   }
 }
+
+// TODO: move to Condition/ConditionDeviceHelper?
 void handleSwitchConditions(ConditionDevice& device, String onTime, String onSurplus, String onDuration, String offTime, String offShortage, String offDuration) {
+
   Serial.println(onTime);
   Serial.println(onSurplus);
   Serial.println(onDuration);
   Serial.println(offTime);
   Serial.println(offShortage);
   Serial.println(offDuration);
+
+  int startHour = onTime.toInt();
+  int stopHour = offTime.toInt();
+  int oversupplyValue = onSurplus.toInt();
+  int shortageValue = offShortage.toInt();
+  int secondsOfOversupply = onDuration.toInt();
+  int secondsOfShortage = offDuration.toInt();
+
+  // clear actions
+  device.actions.clear();
+
+  // on action
+  ConditionDeviceAction actionOn;
+  actionOn.id = 1;
+  actionOn.deviceId = device.id;
+  actionOn.type = ACTION_TYPE_ON;
+
+  // start if its later than startHour
+  if(startHour > 0) {
+    ConditionDeviceActionRule ruleOnStart;
+    ruleOnStart.type = RULE_TYPE_TIME;
+    ruleOnStart.condition = CONDITION_GREATER_THAN;
+    ruleOnStart.value = (startHour * 3600);
+    ruleOnStart.threshold = 0;
+    actionOn.rules.push_back(ruleOnStart);
+  }
+  // and earlier than stopHour
+  if(stopHour > 0) {
+    ConditionDeviceActionRule ruleOnStop;
+    ruleOnStop.type = RULE_TYPE_TIME;
+    ruleOnStop.condition = CONDITION_LESS_THAN;
+    ruleOnStop.value = (stopHour * 3600);
+    ruleOnStop.threshold = 0;
+    actionOn.rules.push_back(ruleOnStop);
+  }
+  // and oversupply greater than oversupplyValue for given time
+  if(oversupplyValue > 0) {
+    ConditionDeviceActionRule ruleOnOversupply;
+    ruleOnOversupply.type = RULE_TYPE_OVERSUPPLY;
+    ruleOnOversupply.condition = CONDITION_GREATER_THAN;
+    ruleOnOversupply.value = oversupplyValue;
+    ruleOnOversupply.threshold = (secondsOfOversupply * 1000);
+    actionOn.rules.push_back(ruleOnOversupply);
+  }
+
+  device.actions[actionOn.id] = actionOn;
+
+  // stop before startHour
+  if(startHour > 0) {
+    ConditionDeviceAction actionOff;
+    actionOff.id = 2;
+    actionOff.deviceId = device.id;
+    actionOff.type = ACTION_TYPE_OFF;
+
+    ConditionDeviceActionRule ruleOff;
+    ruleOff.type = RULE_TYPE_TIME;
+    ruleOff.condition = CONDITION_LESS_THAN;
+    ruleOff.value = (startHour * 3600);
+    ruleOff.threshold = 0;
+    actionOff.rules.push_back(ruleOff);
+
+    device.actions[actionOff.id] = actionOff;
+  }
+
+  // stop after stopHour
+  if(stopHour > 0) {
+    ConditionDeviceAction actionOff;
+    actionOff.id = 3;
+    actionOff.deviceId = device.id;
+    actionOff.type = ACTION_TYPE_OFF;
+
+    ConditionDeviceActionRule ruleOff;
+    ruleOff.type = RULE_TYPE_TIME;
+    ruleOff.condition = CONDITION_GREATER_THAN;
+    ruleOff.value = (stopHour * 3600);
+    ruleOff.threshold = 0;
+    actionOff.rules.push_back(ruleOff);
+
+    device.actions[actionOff.id] = actionOff;
+  }
+
+  // stop on shortage
+  if(shortageValue > 0) {
+    ConditionDeviceAction actionOff;
+    actionOff.id = 4;
+    actionOff.deviceId = device.id;
+    actionOff.type = ACTION_TYPE_OFF;
+
+    ConditionDeviceActionRule ruleOff;
+    ruleOff.type = RULE_TYPE_SHORTAGE;
+    ruleOff.condition = CONDITION_GREATER_THAN;
+    ruleOff.value = shortageValue;
+    ruleOff.threshold = (secondsOfShortage * 1000);
+    actionOff.rules.push_back(ruleOff);
+
+    device.actions[actionOff.id] = actionOff;
+  }
+
+  // save changes to SPIFFS
+  conditionService.storeConditionDevices();
 }
 
 

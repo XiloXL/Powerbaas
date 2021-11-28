@@ -10,6 +10,9 @@ bool ConditionService::storeConditionDevices() {
   // foreach device
   for (auto& deviceElement: _devices) {
     ConditionDevice& device = deviceElement.second;
+    if(device.id == 0) {
+      continue;
+    }
     devicesCsv = "\n" + conditionDeviceStructToCsv(device) + devicesCsv;
 
     // foreach action
@@ -23,6 +26,14 @@ bool ConditionService::storeConditionDevices() {
       }
     }
   }
+
+  Serial.println("=================================");
+  Serial.println(devicesCsv.substring(1).c_str());
+  Serial.println("=================================");
+  Serial.println(actionsCsv.substring(1).c_str());
+  Serial.println("=================================");
+  Serial.println(rulesCsv.substring(1).c_str());
+  Serial.println("=================================");
 
   // remove old files
   SPIFFS.remove(_devicesFile.c_str());

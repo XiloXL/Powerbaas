@@ -29,6 +29,7 @@ bool ActionHandlerSwitchDevice::handle(ConditionDevice& device, ConditionDeviceA
   // turn off
   if(action.type == ACTION_TYPE_OFF) {
     if(device.state == DEVICE_ON) {
+      Serial.println("Turn device Off!");
       NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
       transmitter.sendUnit(0, false);
       device.state = DEVICE_OFF;
@@ -37,6 +38,7 @@ bool ActionHandlerSwitchDevice::handle(ConditionDevice& device, ConditionDeviceA
   // turn on
   else if(action.type == ACTION_TYPE_ON) {
     if(device.state == DEVICE_OFF) {
+      Serial.println("Turn device On!");
       NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
       transmitter.sendUnit(0, true);
       device.state = DEVICE_ON;

@@ -17,16 +17,24 @@ ConditionService conditionService;
 ConditionMachine conditionMachine(conditionService, meterReading, systemTime);
 
 void setup() {
-  Serial.begin(115200);
-  delay(3000);
-  if(!SPIFFS.begin(true)){
-    Serial.println("An Error has occurred while mounting SPIFFS");
-  }
+  setupSerial();
+  setupSpiffs();
   setupPowerbaas();
   setupWebserver();
   setupSystemTime();
   setupEndpoints();
   setupConditionMachine();
+}
+
+void setupSerial() {
+  Serial.begin(115200);
+  delay(3000);
+}
+
+void setupSpiffs() {
+  if(!SPIFFS.begin(true)){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+  }
 }
 
 void setupPowerbaas() {

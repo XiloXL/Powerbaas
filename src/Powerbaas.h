@@ -14,6 +14,7 @@
 
 #include "Condition/ConditionMachine.h"
 #include "Condition/ConditionService.h"
+#include "Condition/ConditionDeviceHelper.h"
 
 class Powerbaas {
   public:

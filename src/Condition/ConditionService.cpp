@@ -27,11 +27,11 @@ bool ConditionService::storeConditionDevices() {
     }
   }
 
-  Serial.println("=================================");
+  Serial.println("=========== DEVICES =============");
   Serial.println(devicesCsv.substring(1).c_str());
-  Serial.println("=================================");
+  Serial.println("=========== ACTIONS =============");
   Serial.println(actionsCsv.substring(1).c_str());
-  Serial.println("=================================");
+  Serial.println("============ RULES ==============");
   Serial.println(rulesCsv.substring(1).c_str());
   Serial.println("=================================");
 

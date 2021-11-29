@@ -20,10 +20,16 @@ void setup() {
   setupSerial();
   setupSpiffs();
   setupPowerbaas();
-  setupWebserver();
+  setupWifi();
   setupSystemTime();
   setupEndpoints();
   setupConditionMachine();
+}
+
+void loop() {
+  timer1.update();
+  powerbaas.receive();
+  server.handleClient();
 }
 
 void setupSerial() {
@@ -44,7 +50,7 @@ void setupPowerbaas() {
   powerbaas.setup();
 }
 
-void setupWebserver() {
+void setupWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
@@ -80,6 +86,11 @@ void setupConditionMachine() {
 }
 
 
+
+/***************************************
+ *** Webserver routes ******************
+ ***************************************/
+
 void setupEndpoints() {
 
   // index
@@ -95,7 +106,8 @@ void setupEndpoints() {
     String switchId = server.pathArg(0);
     std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
     ConditionDevice& device = devices[switchId.toInt()];
-    server.send(200, "text/html", editSwitch(device));
+    OnOffConditions conditions = ConditionDeviceHelper::getOnOffConditionsFromDevice(device);
+    server.send(200, "text/html", editSwitch(device, conditions));
   });
   // edit switch form
   server.on(UriBraces("/switch/delete/{}"), []() {
@@ -175,175 +187,7 @@ void setupEndpoints() {
     server.send(200, "text/html", redirect());
   });
 
-
   server.begin();
-}
-
-void loop() {
-  timer1.update();
-  powerbaas.receive();
-  server.handleClient();
-}
-
-
-
-/***************************************
- *** Process actions from HTML pages ***
- ***************************************/
-
-void handleSwitchAdd(String name) {
-  ConditionDevice device;
-  device.id = esp_random() % 10000000;
-  strcpy(device.name, name.c_str());
-  device.state = DEVICE_OFF;
-  device.type = DEVICE_SWITCH;
-  device.enabled = DEVICE_ENABLED;
-  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
-  devices[device.id] = device;
-  conditionService.storeConditionDevices();
-}
-
-void handleSwitchEdit(ConditionDevice& device, String name) {
-  strcpy(device.name, name.c_str());
-  conditionService.storeConditionDevices();
-}
-
-void handleSwitchDelete(ConditionDevice& device) {
-  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
-  devices.erase(device.id);
-  conditionService.storeConditionDevices();
-}
-
-void handleSwitchOn(ConditionDevice& device) {
-  device.state = DEVICE_ON;
-  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
-  transmitter.sendUnit(0, true);
-  // todo: overrule
-}
-
-void handleSwitchOff(ConditionDevice& device) {
-  device.state = DEVICE_OFF;
-  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
-  transmitter.sendUnit(0, false);
-  // todo: overrule
-}
-void handleSwitchPair(ConditionDevice& device) {
-  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
-  for(int i = 0; i < 9; i++) {
-    transmitter.sendUnit(0, true);
-    delay(900);
-  }
-}
-
-// TODO: move to Condition/ConditionDeviceHelper?
-void handleSwitchConditions(ConditionDevice& device, String onTime, String onSurplus, String onDuration, String offTime, String offShortage, String offDuration) {
-
-  Serial.println(onTime);
-  Serial.println(onSurplus);
-  Serial.println(onDuration);
-  Serial.println(offTime);
-  Serial.println(offShortage);
-  Serial.println(offDuration);
-
-  int startHour = onTime.toInt();
-  int stopHour = offTime.toInt();
-  int oversupplyValue = onSurplus.toInt();
-  int shortageValue = offShortage.toInt();
-  int secondsOfOversupply = onDuration.toInt();
-  int secondsOfShortage = offDuration.toInt();
-
-  // clear actions
-  device.actions.clear();
-
-  // on action
-  ConditionDeviceAction actionOn;
-  actionOn.id = 1;
-  actionOn.deviceId = device.id;
-  actionOn.type = ACTION_TYPE_ON;
-
-  // start if its later than startHour
-  if(startHour > 0) {
-    ConditionDeviceActionRule ruleOnStart;
-    ruleOnStart.type = RULE_TYPE_TIME;
-    ruleOnStart.condition = CONDITION_GREATER_THAN;
-    ruleOnStart.value = (startHour * 3600);
-    ruleOnStart.threshold = 0;
-    actionOn.rules.push_back(ruleOnStart);
-  }
-  // and earlier than stopHour
-  if(stopHour > 0) {
-    ConditionDeviceActionRule ruleOnStop;
-    ruleOnStop.type = RULE_TYPE_TIME;
-    ruleOnStop.condition = CONDITION_LESS_THAN;
-    ruleOnStop.value = (stopHour * 3600);
-    ruleOnStop.threshold = 0;
-    actionOn.rules.push_back(ruleOnStop);
-  }
-  // and oversupply greater than oversupplyValue for given time
-  if(oversupplyValue > 0) {
-    ConditionDeviceActionRule ruleOnOversupply;
-    ruleOnOversupply.type = RULE_TYPE_OVERSUPPLY;
-    ruleOnOversupply.condition = CONDITION_GREATER_THAN;
-    ruleOnOversupply.value = oversupplyValue;
-    ruleOnOversupply.threshold = (secondsOfOversupply * 1000);
-    actionOn.rules.push_back(ruleOnOversupply);
-  }
-
-  device.actions[actionOn.id] = actionOn;
-
-  // stop before startHour
-  if(startHour > 0) {
-    ConditionDeviceAction actionOff;
-    actionOff.id = 2;
-    actionOff.deviceId = device.id;
-    actionOff.type = ACTION_TYPE_OFF;
-
-    ConditionDeviceActionRule ruleOff;
-    ruleOff.type = RULE_TYPE_TIME;
-    ruleOff.condition = CONDITION_LESS_THAN;
-    ruleOff.value = (startHour * 3600);
-    ruleOff.threshold = 0;
-    actionOff.rules.push_back(ruleOff);
-
-    device.actions[actionOff.id] = actionOff;
-  }
-
-  // stop after stopHour
-  if(stopHour > 0) {
-    ConditionDeviceAction actionOff;
-    actionOff.id = 3;
-    actionOff.deviceId = device.id;
-    actionOff.type = ACTION_TYPE_OFF;
-
-    ConditionDeviceActionRule ruleOff;
-    ruleOff.type = RULE_TYPE_TIME;
-    ruleOff.condition = CONDITION_GREATER_THAN;
-    ruleOff.value = (stopHour * 3600);
-    ruleOff.threshold = 0;
-    actionOff.rules.push_back(ruleOff);
-
-    device.actions[actionOff.id] = actionOff;
-  }
-
-  // stop on shortage
-  if(shortageValue > 0) {
-    ConditionDeviceAction actionOff;
-    actionOff.id = 4;
-    actionOff.deviceId = device.id;
-    actionOff.type = ACTION_TYPE_OFF;
-
-    ConditionDeviceActionRule ruleOff;
-    ruleOff.type = RULE_TYPE_SHORTAGE;
-    ruleOff.condition = CONDITION_GREATER_THAN;
-    ruleOff.value = shortageValue;
-    ruleOff.threshold = (secondsOfShortage * 1000);
-    actionOff.rules.push_back(ruleOff);
-
-    device.actions[actionOff.id] = actionOff;
-  }
-
-  // save changes to SPIFFS
-  conditionService.storeConditionDevices();
 }
 
 
@@ -351,6 +195,7 @@ void handleSwitchConditions(ConditionDevice& device, String onTime, String onSur
 /***************************************
  *** HTML pages and forms **************
  ***************************************/
+
 String index() {
 
   String body = "<h3>Current power usage</h3>\n";
@@ -384,7 +229,7 @@ String addSwitch() {
   return html(body);
 }
 
-String editSwitch(ConditionDevice& device) {
+String editSwitch(ConditionDevice& device, OnOffConditions& conditions) {
 
   // edit name
   String body = "<h3>Edit Smart Switch " + String(device.name) + " (" + String(device.id) + ") </h3>\n";
@@ -411,36 +256,35 @@ String editSwitch(ConditionDevice& device) {
 
   body += "<table><tr>\n";
   body += "<td>Turn device on at time:</td></tr><tr>\n";
-  body += "<td><input name=\"on_time\" type=\"range\" value=\"0\" min=\"0\" max=\"24\" oninput=\"document.getElementById('on_time').value = this.value\"></td>\n";
-  body += "<td><output id=\"on_time\">0</output> hour</td></tr>\n";
+  body += "<td><input name=\"on_time\" type=\"range\" value=\"" + String(conditions.startHour) + "\" min=\"0\" max=\"24\" oninput=\"document.getElementById('on_time').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_time\">" + String(conditions.startHour) + "</output> hour</td></tr>\n";
 
   // when there is solar surplus of:
   body += "<tr><td>When there is solar surplus of:</td></tr><tr>\n";
-  body += "<td><input name=\"on_surplus\" type=\"range\" value=\"0\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('on_surplus').value = this.value\"></td>\n";
-  body += "<td><output id=\"on_surplus\">0</output> watts</td></tr>\n";
+  body += "<td><input name=\"on_surplus\" type=\"range\" value=\"" + String(conditions.oversupplyValue) + "\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('on_surplus').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_surplus\">" + String(conditions.oversupplyValue) + "</output> watts</td></tr>\n";
 
   // for a duration of:
-  body += "<tr><td>For a duration of:</td></tr><tr>\n";
-  body += "<td><input name=\"on_duration\" type=\"range\" value=\"0\" min=\"0\" max=\"300\" oninput=\"document.getElementById('on_duration').value = this.value\"></td>\n";
-  body += "<td><output id=\"on_duration\">0</output> sec</td></tr></table>\n";
-
+  body += "<tr><td>And surplus for a duration of:</td></tr><tr>\n";
+  body += "<td><input name=\"on_duration\" type=\"range\" value=\"" + String(conditions.secondsOfOversupply) + "\" min=\"0\" max=\"300\" oninput=\"document.getElementById('on_duration').value = this.value\"></td>\n";
+  body += "<td><output id=\"on_duration\">" + String(conditions.secondsOfOversupply) + "</output> sec</td></tr></table>\n";
 
   // turn device off conditions
   body += "<hr /><h3>Turn device off</h3>\n";
   body += "<table><tr>\n";
   body += "<td>Turn device off at time:</td></tr><tr>\n";
-  body += "<td><input name=\"off_time\" type=\"range\" value=\"0\" min=\"0\" max=\"24\" oninput=\"document.getElementById('off_time').value = this.value\"></td>\n";
-  body += "<td><output id=\"off_time\">0</output> hour</td></tr>\n";
+  body += "<td><input name=\"off_time\" type=\"range\" value=\"" + String(conditions.stopHour) + "\" min=\"0\" max=\"24\" oninput=\"document.getElementById('off_time').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_time\">" + String(conditions.stopHour) + "</output> hour</td></tr>\n";
 
   // when there is power shortage  of:
-  body += "<tr><td>When there is power shortage of:</td></tr><tr>\n";
-  body += "<td><input name=\"off_shortage\" type=\"range\" value=\"0\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('off_shortage').value = this.value\"></td>\n";
-  body += "<td><output id=\"off_shortage\">0</output> watts</td></tr>\n";
+  body += "<tr><td>Or when there is power shortage of:</td></tr><tr>\n";
+  body += "<td><input name=\"off_shortage\" type=\"range\" value=\"" + String(conditions.shortageValue) + "\" min=\"0\" max=\"3000\" oninput=\"document.getElementById('off_shortage').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_shortage\">" + String(conditions.shortageValue) + "</output> watts</td></tr>\n";
 
   // for a duration of:
-  body += "<tr><td>For a duration of:</td></tr><tr>\n";
-  body += "<td><input name=\"off_duration\" type=\"range\" value=\"0\" min=\"0\" max=\"300\" oninput=\"document.getElementById('off_duration').value = this.value\"></td>\n";
-  body += "<td><output id=\"off_duration\">0</output> sec</td></tr></table><hr />\n";
+  body += "<tr><td>And shortage for a duration of:</td></tr><tr>\n";
+  body += "<td><input name=\"off_duration\" type=\"range\" value=\"" + String(conditions.secondsOfShortage) + "\" min=\"0\" max=\"300\" oninput=\"document.getElementById('off_duration').value = this.value\"></td>\n";
+  body += "<td><output id=\"off_duration\">" + String(conditions.secondsOfShortage) + "</output> sec</td></tr></table><hr />\n";
   body += "<input type=\"submit\" /></div>\n";
   body += "<br /><br /><br /><br /><br />\n";
   body += "</div>\n";
@@ -506,35 +350,36 @@ String redirect() {
 }
 
 String html(String body) {
-  String ptr = R"END(
-  <!DOCTYPE html>
-  <html>
-  <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <!-- <meta http-equiv="refresh" content="2"> -->
-  <title>PowerBaas</title>
-  <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
-    body{margin-top: 20px;} h3 {color: #2d2d2d;margin-bottom: 10px margin-top:50px;}
-    .card {display: inline-block;width: 80px; background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
-    .card-small{width:40px; display:inline-block;}
-    .card-on {background-color: #38b54a;}
-    .card-off {background-color: #2d2d2d;}
-    .card-action {background-color: #ece50a;}
-    .card-grey {background-color: #dddddd;}
-    .card-red {background-color: #CC0000; }
-    p {font-size: 14px;color: #2d2d2d;margin-bottom: 10px;}
-    input { padding:10px; border-radius:10px; border:1px solid #cccccc; }
-    input[type=submit] { margin-top:25px; }
-    input[type=range] { width:300px; }
-    td { text-align:left; }
-    table { width:90%; max-width:440px; margin-left: auto;margin-right: auto; }
-  </style>
-  </head>
-  <body>
-  <a href="/">
-  <img style='border:none; width:80%; margin-bottom:25px;' src="https://t.eu1.jwwb.nl/W1292300/7Z67ppdpu6A8hHiS3s7fsxO1-ys=/658x0/filters:quality(70)/f.eu1.jwwb.nl%2Fpublic%2Fs%2Fq%2Fx%2Ftemp-ubafshmstbomdhzsimxh%2Fum7ocq%2Fimage-1.png" />
-  </a>
-  )END";
+String ptr = R"html(
+             <!DOCTYPE html>
+               <html>
+               <head>
+               <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+               <!-- <meta http-equiv="refresh" content="2"> -->
+               <title>PowerBaas</title>
+               <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
+                 body{margin-top: 20px;} h3 {color: #2d2d2d;margin-bottom: 10px margin-top:50px;}
+                 .card {display: inline-block;width: 80px; background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}
+                 .card-small{width:40px; display:inline-block;}
+                 .card-on {background-color: #38b54a;}
+                 .card-off {background-color: #2d2d2d;}
+                 .card-action {background-color: #ece50a;}
+                 .card-grey {background-color: #dddddd;}
+                 .card-red {background-color: #CC0000; }
+                 p {font-size: 14px;color: #2d2d2d;margin-bottom: 10px;}
+                 input { padding:10px; border-radius:10px; border:1px solid #cccccc; }
+                 input[type=submit] { margin-top:25px; }
+                 input[type=range] { width:300px; }
+                 td { text-align:left; }
+                 table { width:90%; max-width:440px; margin-left: auto;margin-right: auto; }
+               </style>
+               </head>
+               <body>
+               <a href="/">
+               <img style='border:none; width:80%; margin-bottom:25px;' src="https://t.eu1.jwwb.nl/W1292300/7Z67ppdpu6A8hHiS3s7fsxO1-ys=/658x0/filters:quality(70)/f.eu1.jwwb.nl%2Fpublic%2Fs%2Fq%2Fx%2Ftemp-ubafshmstbomdhzsimxh%2Fum7ocq%2Fimage-1.png" />
+               </a>
+             )html";
+             //)END";
 
   ptr += body;
 
@@ -542,4 +387,72 @@ String html(String body) {
   ptr += "</html>\n";
 
   return ptr;
+}
+
+
+
+/***************************************
+ *** Process actions from HTML pages ***
+ ***************************************/
+
+void handleSwitchAdd(String name) {
+  ConditionDevice device;
+  device.id = esp_random() % 10000000;
+  strcpy(device.name, name.c_str());
+  device.state = DEVICE_OFF;
+  device.type = DEVICE_SWITCH;
+  device.enabled = DEVICE_ENABLED;
+  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
+  devices[device.id] = device;
+  conditionService.storeConditionDevices();
+}
+
+void handleSwitchEdit(ConditionDevice& device, String name) {
+  strcpy(device.name, name.c_str());
+  conditionService.storeConditionDevices();
+}
+
+void handleSwitchDelete(ConditionDevice& device) {
+  std::unordered_map<uint8_t, ConditionDevice>& devices = conditionService.getConditionDevices();
+  devices.erase(device.id);
+  conditionService.storeConditionDevices();
+}
+
+void handleSwitchOn(ConditionDevice& device) {
+  device.state = DEVICE_ON;
+  device.overruledUntil = millis() + (3600*1000); // overrule for 1 hour
+  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
+  transmitter.sendUnit(0, true);
+}
+
+void handleSwitchOff(ConditionDevice& device) {
+  device.state = DEVICE_OFF;
+  device.overruledUntil = millis() + (3600*1000); // overrule for 1 hour
+  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
+  transmitter.sendUnit(0, false);
+}
+
+void handleSwitchPair(ConditionDevice& device) {
+  NewRemoteTransmitter transmitter(device.id, 12, 232, 3);
+  for(int i = 0; i < 9; i++) {
+    transmitter.sendUnit(0, true);
+    delay(900);
+  }
+}
+
+void handleSwitchConditions(ConditionDevice& device, String onTime, String onSurplus, String onDuration, String offTime, String offShortage, String offDuration) {
+
+  OnOffConditions onoff;
+  onoff.startHour = onTime.toInt();
+  onoff.stopHour = offTime.toInt();
+  onoff.oversupplyValue = onSurplus.toInt();
+  onoff.shortageValue = offShortage.toInt();
+  onoff.secondsOfOversupply = onDuration.toInt();
+  onoff.secondsOfShortage = offDuration.toInt();
+
+  // save settings to device
+  ConditionDeviceHelper::storeOnOffConditionsToDevice(device, onoff);
+
+  // store changes to SPIFFS
+  conditionService.storeConditionDevices();
 }

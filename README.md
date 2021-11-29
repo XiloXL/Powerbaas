@@ -20,6 +20,12 @@ With this shield and library you are able to:
 ## Added in version 1.0.2
 - MQTT example
 
+## Added in version 1.1.0
+- Support for KlikAanKlikUit 433Mhz socket switches
+- Turn switch on or off via webserver button
+- Let Powerbaas turn switch on/off based on power usage
+- Let Powerbaas turn switch on/off based on time of day
+- Fully pairable and configurable via webserver
+
 ## Next release
-- 433MHz transmitter support
-- Klik-Aan-Klik-Uit (KAKU) devices 
+- Extended dashboard index

@@ -4,7 +4,7 @@
 #include <WString.h>
 #define NTP_SERVERS "nl.pool.ntp.org", "pool.ntp.org", "time.nist.gov"
 
-#include "Timezone.h"
+#include "../Timezone/Timezone.h"
 
 class SystemLogger;
 

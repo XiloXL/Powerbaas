@@ -97,6 +97,13 @@ void setupEndpoints() {
   server.on("/", []() {
     server.send(200, "text/html", index());
   });
+  server.on("/json", []() {
+    String json = String("{ ");
+    json += String("\"powerUsage\": ");
+    json += String(meterReading.powerUsage);
+    json += String(" }");
+    server.send(200, "text/json", json);
+  });
   // add switch form
   server.on("/switch/add", []() {
     server.send(200, "text/html", addSwitch());
@@ -199,7 +206,7 @@ void setupEndpoints() {
 String index() {
 
   String body = "<h3>Current power usage</h3>\n";
-  body += "<div class=\"card card-on\">" + String(meterReading.powerUsage) + " Watt</div>\n";
+  body += "<div id=\"powerUsage\" class=\"card card-on\">" + String(meterReading.powerUsage) + " Watt</div>\n";
 
   // Switch
   body += "<h3>Smart Switches</h3>\n";
@@ -215,6 +222,21 @@ String index() {
   }
   body += "<a href=\"/switch/add\" class=\"card card-grey\">" + String("+") + "</a>\n";
 
+  body += R"END(
+  <script language="javascript">
+    setInterval(function(){
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var meterReading = JSON.parse(xhttp.responseText);
+          document.getElementById("powerUsage").innerHTML = meterReading.powerUsage + ' Watt';
+        }
+      };
+      xhttp.open("GET", "json", true);
+      xhttp.send();
+    }, 1000);
+  </script>
+  )END";
   return html(body);
 }
 
@@ -355,7 +377,6 @@ String ptr = R"html(
                <html>
                <head>
                <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-               <!-- <meta http-equiv="refresh" content="2"> -->
                <title>PowerBaas</title>
                <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
                  body{margin-top: 20px;} h3 {color: #2d2d2d;margin-bottom: 10px margin-top:50px;}

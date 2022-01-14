@@ -28,4 +28,4 @@ With this shield and library you are able to:
 - Fully pairable and configurable via webserver
 
 ## Next release
-- Extended dashboard index
+- Support for Belgium

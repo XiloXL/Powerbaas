@@ -27,5 +27,8 @@ With this shield and library you are able to:
 - Let Powerbaas turn switch on/off based on time of day
 - Fully pairable and configurable via webserver
 
+## Added in version 1.2.0
+- Support for Belgian Meters
+
 ## Next release
-- Support for Belgium
+- We are open to suggestions :)

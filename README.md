@@ -30,5 +30,6 @@ With this shield and library you are able to:
 ## Added in version 1.2.0
 - Support for Belgian Meters
 
-## Next release
-- We are open to suggestions :)
+## Added in version 1.3.0
+- Current per phase
+- Actual 

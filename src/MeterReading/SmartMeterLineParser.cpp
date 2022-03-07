@@ -34,6 +34,67 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
     }
   }
 
+
+  // Amps line 1 / 3
+  else if (sscanf(line, "1-0:31.7.0(%f*A", &result) == 1) {
+    meterReading.currentL1 = (int)result;
+  }
+  else if (sscanf(line, "1-0:51.7.0(%f*A", &result) == 1) {
+    meterReading.currentL2 = (int)result;
+  }
+  else if (sscanf(line, "1-0:71.7.0(%f*A", &result) == 1) {
+    meterReading.currentL3 = (int)result;
+  }
+
+  // Voltages line 1 / 3
+  else if (sscanf(line, "1-0:32.7.0(%f*V", &result) == 1) {
+    meterReading.voltageL1 = result;
+  }
+  else if (sscanf(line, "1-0:52.7.0(%f*V", &result) == 1) {
+    meterReading.currentL2 = result;
+  }
+  else if (sscanf(line, "1-0:72.7.0(%f*V", &result) == 1) {
+    meterReading.currentL3 = result;
+  }
+
+  // Power line 1 / 3
+  else if (sscanf(line, "1-0:21.7.0(%f", &result) == 1) {
+    auto shortage = resultToInt(result);
+    if (shortage > 0) {
+      meterReading.powerL1 = shortage;
+    }
+  }
+  else if (sscanf(line, "1-0:22.7.0(%f", &result) == 1) {
+    auto oversupply = resultToInt(result);
+    if (oversupply > 0) {
+      meterReading.powerL1 = -oversupply;
+    }
+  }
+  else if (sscanf(line, "1-0:41.7.0(%f", &result) == 1) {
+    auto shortage = resultToInt(result);
+    if (shortage > 0) {
+      meterReading.powerL2 = shortage;
+    }
+  }
+  else if (sscanf(line, "1-0:42.7.0(%f", &result) == 1) {
+    auto oversupply = resultToInt(result);
+    if (oversupply > 0) {
+      meterReading.powerL2 = -oversupply;
+    }
+  }
+  else if (sscanf(line, "1-0:61.7.0(%f", &result) == 1) {
+    auto shortage = resultToInt(result);
+    if (shortage > 0) {
+      meterReading.powerL3 = shortage;
+    }
+  }
+  else if (sscanf(line, "1-0:62.7.0(%f", &result) == 1) {
+    auto oversupply = resultToInt(result);
+    if (oversupply > 0) {
+      meterReading.powerL3 = -oversupply;
+    }
+  }
+
   // parse country differences
   if(_isBelgium) {
     parseBelgium(line, meterReading);

@@ -21,6 +21,19 @@ void setup() {
 
     Serial.print("Gas used:             ");
     Serial.println(meterReading.gas);
+
+    Serial.println("Phases:");
+    Serial.println(meterReading.voltageL1);
+    Serial.println(meterReading.voltageL2);
+    Serial.println(meterReading.voltageL3);
+
+    Serial.println(meterReading.currentL1);
+    Serial.println(meterReading.currentL2);
+    Serial.println(meterReading.currentL3);
+
+    Serial.println(meterReading.powerL1);
+    Serial.println(meterReading.powerL2);
+    Serial.println(meterReading.powerL3);
   });
   powerbaas.setup();
 }

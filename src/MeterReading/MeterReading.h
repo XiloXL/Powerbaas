@@ -20,14 +20,19 @@ struct MeterReading {
   uint32_t gas;
 
   // voltage per phase
-  uint16_t voltageL1;
-  uint16_t voltageL2;
-  uint16_t voltageL3;
+  float voltageL1;
+  float voltageL2;
+  float voltageL3;
 
   // current per phase
   uint8_t currentL1;
   uint8_t currentL2;
   uint8_t currentL3;
+
+  // power per phase
+  int32_t powerL1;
+  int32_t powerL2;
+  int32_t powerL3;
 };
 
 typedef std::function<void(const MeterReading&)> MeterReadingCallback;

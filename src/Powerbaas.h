@@ -33,7 +33,7 @@ class Powerbaas {
 
   private:
     bool _loggingEnabled;
-    MeterReading _meterReading{0,0,0,0,0,0};
+    MeterReading _meterReading{"",0,0,0,0,0,0};
     SmartMeterLineParser _smartMeterLineParser;
     SmartMeterAdapter _smartMeterAdapter;
 

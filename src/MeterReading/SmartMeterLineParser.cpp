@@ -3,6 +3,7 @@
 void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
 
   float result;
+  char tms[14];
 
   // belgium
   // @TEST: smartMeterLineParser_Netherlands
@@ -12,6 +13,11 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
     if (strcmp(country, "FLU") == 0) {
       _isBelgium = true;
     }
+  }
+
+  // 0-0:1.0.0 = Timestamp
+  else if (sscanf(line, "0-0:1.0.0(%13s", &tms) == 1) {
+    strcpy(meterReading.timestamp, tms);
   }
 
   // 1-0:1.7.0 = Huidig verbruik

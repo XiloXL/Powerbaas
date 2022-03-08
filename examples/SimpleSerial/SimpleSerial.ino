@@ -6,6 +6,10 @@ void setup() {
   Serial.begin(115200);
 
   powerbaas.onMeterReading([](const MeterReading& meterReading) {
+
+    Serial.print("Timestamp:            ");
+    Serial.println(meterReading.timestamp);
+
     Serial.print("Current power usage:  ");
     Serial.println(meterReading.powerUsage);
 

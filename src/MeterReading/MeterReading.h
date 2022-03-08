@@ -5,6 +5,9 @@
 #include <functional>
 
 struct MeterReading {
+
+  char timestamp[14];
+
   // this is the amount of power currently used, negative if you return to the net, positive if you use from the net
   int32_t powerUsage;
 

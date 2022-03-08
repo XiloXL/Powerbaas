@@ -33,3 +33,6 @@ With this shield and library you are able to:
 ## Added in version 1.3.0
 - Current per phase
 - Actual 
+
+## Added in version 1.3.1
+- Timestamp

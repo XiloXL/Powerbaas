@@ -1,7 +1,7 @@
 #ifndef __CONDITION_DEVICE_HELPER_H__
 #define __CONDITION_DEVICE_HELPER_H__
 
-#include "Condition.h";
+#include "Condition.h"
 
 struct OnOffConditions {
   uint8_t startHour = 0;

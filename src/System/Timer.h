@@ -1,6 +1,8 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#include <vector>
+
 class TimerConfiguration {
   public:
     TimerConfiguration(uint32_t millis, uint32_t initialOffset, std::function<void()> callback): _millis(millis), _callback(callback), _timer(millis + initialOffset) {}

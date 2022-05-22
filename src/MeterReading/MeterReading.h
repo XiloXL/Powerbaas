@@ -28,9 +28,9 @@ struct MeterReading {
   float voltageL3;
 
   // current per phase
-  uint8_t currentL1;
-  uint8_t currentL2;
-  uint8_t currentL3;
+  float currentL1;
+  float currentL2;
+  float currentL3;
 
   // power per phase
   int32_t powerL1;

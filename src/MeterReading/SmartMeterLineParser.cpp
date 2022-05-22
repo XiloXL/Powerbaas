@@ -43,13 +43,13 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
 
   // Amps line 1 / 3
   else if (sscanf(line, "1-0:31.7.0(%f*A", &result) == 1) {
-    meterReading.currentL1 = (int)result;
+    meterReading.currentL1 = result;
   }
   else if (sscanf(line, "1-0:51.7.0(%f*A", &result) == 1) {
-    meterReading.currentL2 = (int)result;
+    meterReading.currentL2 = result;
   }
   else if (sscanf(line, "1-0:71.7.0(%f*A", &result) == 1) {
-    meterReading.currentL3 = (int)result;
+    meterReading.currentL3 = result;
   }
 
   // Voltages line 1 / 3
@@ -57,10 +57,10 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
     meterReading.voltageL1 = result;
   }
   else if (sscanf(line, "1-0:52.7.0(%f*V", &result) == 1) {
-    meterReading.currentL2 = result;
+    meterReading.voltageL2 = result;
   }
   else if (sscanf(line, "1-0:72.7.0(%f*V", &result) == 1) {
-    meterReading.currentL3 = result;
+    meterReading.voltageL3 = result;
   }
 
   // Power line 1 / 3

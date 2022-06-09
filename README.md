@@ -36,3 +36,6 @@ With this shield and library you are able to:
 
 ## Added in version 1.3.1
 - Timestamp
+
+## Added in version 1.3.2
+- Home automation example

@@ -26,27 +26,6 @@ struct UsernamePassword {
   }
 };
 
-struct WifiCredentials {
-  UsernamePassword usernamePassword;
-};
-
-struct PowerbaasApiCredentials {
-  UsernamePassword usernamePassword;
-};
-
-struct SwitchDevice433MhzCredentials {
-  uint32_t address;
-  uint16_t unit;
-  uint16_t pulseLength;
-  uint8_t iterate;
-};
-
-struct SwitchDeviceAircoCredentials {
-  char urlHeat[128];    // http://192.168.2.199/control?mode=heat&temperature=20&fanspeed=medium
-  char urlCool[128];    // http://192.168.2.199/control?mode=cool&temperature=16&fanspeed=low
-  char urlOff[128];     // http://192.168.2.199/control?mode=off
-};
-
 struct CurrentSensorTotal {
   double total = 0.0;
 };
@@ -54,16 +33,6 @@ struct CurrentSensorTotal {
 struct CurrentSensorCalibration {
   uint8_t phases = 1;
   double calibrateUser = 1.0;
-};
-
-struct LocalApiParams {
-  uint8_t deviceId;
-  uint8_t type;
-  char url[128];
-  char paramTotal[64];
-  char paramCurrent[64];
-  double paramTotalMultiplier;
-  double paramCurrentMultiplier;
 };
 
 #endif

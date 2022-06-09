@@ -80,7 +80,7 @@ void setupWebserver() {
 
   // Handle config
   server.on("/config", []() {
-    server.send(200, "application/json", configHtml());
+    server.send(200, "text/html", configHtml());
   });
 
   server.begin();
@@ -184,7 +184,28 @@ String configHtml() {
   <img style='border:none; width:80%; margin-bottom:25px;' src="https://t.eu1.jwwb.nl/W1292300/7Z67ppdpu6A8hHiS3s7fsxO1-ys=/658x0/filters:quality(70)/f.eu1.jwwb.nl%2Fpublic%2Fs%2Fq%2Fx%2Ftemp-ubafshmstbomdhzsimxh%2Fum7ocq%2Fimage-1.png" />
   </a>
   )END";
-  ptr += "TODO!!!\n";
+
+  if(server.hasArg("total") && server.hasArg("calibration")) {
+
+    // store total
+    CurrentSensorTotal& total = currentSensor.getTotal();
+    total.total = (uint32_t)server.arg("total").toInt();
+    currentSensor.setTotal(total);
+
+    // store config
+    CurrentSensorCalibration& calib = currentSensor.getCalibration();
+    calib.calibrateUser = (double)server.arg("value").toFloat();
+    currentSensor.setCalibration(calib);
+
+    ptr += "<h2>Stored posted values!</h2>\n";
+  }
+
+  ptr += "<form action=\"/config\" method=\"POST\">\n";
+  ptr += "<input type=\"text\" name=\"total\" value=\"" + String(solarReading.total) +"\"></br>\n";
+  ptr += "<input type=\"text\" name=\"calibration\" value=\""+ String(currentSensor.getCalibration().calibrateUser) + "\"></br>\n";
+  ptr += "<input type=\"submit\" value=\"Save\">\n";
+  ptr += "</form>";
+
   ptr += "</body>\n";
   ptr += "</html>\n";
 

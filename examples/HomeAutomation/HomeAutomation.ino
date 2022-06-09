@@ -88,16 +88,16 @@ void setupWebserver() {
 
 void setupTimer() {
 
-  // every minute read
-  timer.runEvery(60000, 0, []() {
+  // every second read
+  timer.runEvery(1000, 0, []() {
     if (currentSensorDetected) {
        solarReading.current = (uint32_t)currentSensor.getCurrent();
        solarReading.total = (uint32_t)currentSensor.getSensorTotal();
      }
   });
 
-  // every 5 minutes, store current sensor total to spiffs
-  timer.runEvery(300000, 0, [](){
+  // every minute, store current sensor total to spiffs
+  timer.runEvery(60000, 0, [](){
     if (currentSensorDetected) {
       currentSensor.storeTotal();
     }
@@ -107,6 +107,7 @@ void setupTimer() {
 void loop() {
   powerbaas.receive();
   server.handleClient();
+  timer.update();
 }
 
 String indexHtml() {
@@ -188,21 +189,25 @@ String configHtml() {
   if(server.hasArg("total") && server.hasArg("calibration")) {
 
     // store total
-    CurrentSensorTotal& total = currentSensor.getTotal();
-    total.total = (uint32_t)server.arg("total").toInt();
+    CurrentSensorTotal total = currentSensor.getTotal();
+    total.total = server.arg("total").toFloat();
+    Serial.print("total: ");
+    Serial.println(total.total);
     currentSensor.setTotal(total);
 
     // store config
-    CurrentSensorCalibration& calib = currentSensor.getCalibration();
-    calib.calibrateUser = (double)server.arg("value").toFloat();
+    CurrentSensorCalibration calib = currentSensor.getCalibration();
+    calib.calibrateUser = server.arg("calibration").toFloat();
+    Serial.print("calib: ");
+    Serial.println(calib.calibrateUser);
     currentSensor.setCalibration(calib);
 
     ptr += "<h2>Stored posted values!</h2>\n";
   }
 
   ptr += "<form action=\"/config\" method=\"POST\">\n";
-  ptr += "<input type=\"text\" name=\"total\" value=\"" + String(solarReading.total) +"\"></br>\n";
-  ptr += "<input type=\"text\" name=\"calibration\" value=\""+ String(currentSensor.getCalibration().calibrateUser) + "\"></br>\n";
+  ptr += "Total: <input type=\"text\" name=\"total\" value=\"" + String(currentSensor.getTotal().total) +"\"></br>\n";
+  ptr += "Calibration: <input type=\"text\" name=\"calibration\" value=\""+ String(currentSensor.getCalibration().calibrateUser) + "\"></br>\n";
   ptr += "<input type=\"submit\" value=\"Save\">\n";
   ptr += "</form>";
 

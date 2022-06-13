@@ -23,8 +23,15 @@ GeneratedSolar solarReading{0,0,0};
 
 void setup() {
   Serial.begin(115200);
-  delay(5000);
+
   setupWifi();
+
+  if(!SPIFFS.begin(true)){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    ESP.restart();
+  }
+  delay(500);
+
   currentSensorDetected = currentSensor.setup();
   if(currentSensorDetected) {
     Serial.println("Current sensor detected!");
@@ -81,6 +88,12 @@ void setupWebserver() {
   // Handle config
   server.on("/config", []() {
     server.send(200, "text/html", configHtml());
+  });
+
+  // Reboot
+  server.on("/reboot", []() {
+    server.send(200, "text/html", "Reboot");
+    ESP.restart();
   });
 
   server.begin();

@@ -92,6 +92,9 @@ void setupWebserver() {
 
   // Reboot
   server.on("/reboot", []() {
+    if (currentSensorDetected) {
+      currentSensor.storeTotal();
+    }
     server.send(200, "text/html", "Reboot");
     ESP.restart();
   });
@@ -168,11 +171,14 @@ String statusJson() {
   json += ",\r\n    \"currentL2\": " + String(meterReading.currentL2);
   json += ",\r\n    \"currentL3\": " + String(meterReading.currentL3);
   json += "\r\n  }";
-  json += ",\r\n  \"solarReading\": {";
-  json += "\r\n    \"timestamp\": " + String(meterReading.timestamp);
-  json += ",\r\n    \"current\": " + String(solarReading.current);
-  json += ",\r\n    \"total\": " + String(solarReading.total);
-  json += "\r\n  }\r\n}";
+  if (currentSensorDetected) {
+      json += ",\r\n  \"solarReading\": {";
+      json += "\r\n    \"timestamp\": " + String(meterReading.timestamp);
+      json += ",\r\n    \"current\": " + String(solarReading.current);
+      json += ",\r\n    \"total\": " + String(solarReading.total);
+      json += "\r\n  }";
+  }
+  json += "\r\n}";
 
   return json;
 }

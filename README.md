@@ -39,3 +39,7 @@ With this shield and library you are able to:
 
 ## Added in version 1.3.2
 - Home automation example
+
+## Added in version 1.3.3
+- Improved home automation example
+- Only show current sensor data in JSON when sensor is connected on startup

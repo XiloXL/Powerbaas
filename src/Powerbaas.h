@@ -7,8 +7,6 @@
 #include "MeterReading/SmartMeterAdapter.h"
 #include "MeterReading/SmartMeterLineParser.h"
 
-#include "Solar/GeneratedSolar.h"
-
 #include "System/SystemTime.h"
 #include "System/Timer.h"
 
@@ -18,10 +16,6 @@
 #include "Condition/ConditionService.h"
 #include "Condition/ConditionDeviceHelper.h"
 
-#include "Solar/CredentialService.h"
-#include "Solar/GeneratedSolar.h"
-#include "Solar/CalibrationTable.h"
-#include "Solar/CurrentSensor.h"
 
 class Powerbaas {
   public:

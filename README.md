@@ -14,11 +14,28 @@ With this shield and library you are able to:
 - Read power imported from grid during off-peak hours
 - Read gas used
 
-## Added in version 1.0.1
-- Webserver example
+## Added in version 1.3.5
+- Improved parsing gas meter reading
 
-## Added in version 1.0.2
-- MQTT example
+## Added in version 1.3.4
+- Improved home automation example
+
+## Added in version 1.3.3
+- Improved home automation example
+- Only show current sensor data in JSON when sensor is connected on startup
+
+## Added in version 1.3.2
+- Home automation example
+
+## Added in version 1.3.1
+- Timestamp
+
+## Added in version 1.3.0
+- Current per phase
+- Actual
+
+## Added in version 1.2.0
+- Support for Belgian Meters
 
 ## Added in version 1.1.0
 - Support for KlikAanKlikUit 433Mhz socket switches
@@ -27,19 +44,8 @@ With this shield and library you are able to:
 - Let Powerbaas turn switch on/off based on time of day
 - Fully pairable and configurable via webserver
 
-## Added in version 1.2.0
-- Support for Belgian Meters
+## Added in version 1.0.2
+- MQTT example
 
-## Added in version 1.3.0
-- Current per phase
-- Actual 
-
-## Added in version 1.3.1
-- Timestamp
-
-## Added in version 1.3.2
-- Home automation example
-
-## Added in version 1.3.3
-- Improved home automation example
-- Only show current sensor data in JSON when sensor is connected on startup
+## Added in version 1.0.1
+- Webserver example

@@ -19,6 +19,8 @@ class SmartMeterLineParser {
   private:
     uint32_t resultToInt(float& result);
     bool _isBelgium = false;
+    uint8_t _currentMbusDevice = 0;
+    uint8_t _currentMbusDeviceType = 0;
 };
 
 #endif

@@ -2,7 +2,7 @@
 
 void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
 
-  float result;
+  double result;
   char tms[14];
 
   // belgium
@@ -111,7 +111,7 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
 
 void SmartMeterLineParser::parseNetherlands(char* line, MeterReading& meterReading) {
 
-  float result;
+  double result;
 
   // 1-0:1.8.1 = Verbruik dal
   if (sscanf(line, "1-0:1.8.1(%f", &result) == 1) {
@@ -162,7 +162,7 @@ void SmartMeterLineParser::parseNetherlands(char* line, MeterReading& meterReadi
 
 void SmartMeterLineParser::parseBelgium(char* line, MeterReading& meterReading) {
 
-  float result;
+  double result;
 
   // 1-0:1.8.1 = Verbruik piek
   // @TEST: smartMeterLineParser_Belgium_parseHighTariff
@@ -206,6 +206,6 @@ void SmartMeterLineParser::parseBelgium(char* line, MeterReading& meterReading) 
   }
 }
 
-uint32_t SmartMeterLineParser::resultToInt(float& result) {
+uint32_t SmartMeterLineParser::resultToInt(const double& result) {
     return uint32_t(result*1000);
 }

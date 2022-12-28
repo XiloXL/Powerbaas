@@ -114,22 +114,22 @@ void SmartMeterLineParser::parseNetherlands(char* line, MeterReading& meterReadi
   double result;
 
   // 1-0:1.8.1 = Verbruik dal
-  if (sscanf(line, "1-0:1.8.1(%f", &result) == 1) {
+  if (sscanf(line, "1-0:1.8.1(%lf", &result) == 1) {
     meterReading.powerDeliverLow = resultToInt(result);
   }
 
   // 1-0:1.8.2 = Verbruik piek
-  else if (sscanf(line, "1-0:1.8.2(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:1.8.2(%lf", &result) == 1) {
     meterReading.powerDeliverHigh = resultToInt(result);
   }
 
   // 1-0:2.8.1 = Teruggeleverd dal
-  else if (sscanf(line, "1-0:2.8.1(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:2.8.1(%lf", &result) == 1) {
     meterReading.powerReturnLow = resultToInt(result);
   }
 
   // 1-0:2.8.2 = Teruggeleverd piek
-  else if (sscanf(line, "1-0:2.8.2(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:2.8.2(%lf", &result) == 1) {
     meterReading.powerReturnHigh = resultToInt(result);
   }
 
@@ -166,22 +166,22 @@ void SmartMeterLineParser::parseBelgium(char* line, MeterReading& meterReading) 
 
   // 1-0:1.8.1 = Verbruik piek
   // @TEST: smartMeterLineParser_Belgium_parseHighTariff
-  if (sscanf(line, "1-0:1.8.1(%f", &result) == 1) {
+  if (sscanf(line, "1-0:1.8.1(%lf", &result) == 1) {
     meterReading.powerDeliverHigh = resultToInt(result);
   }
 
   // 1-0:1.8.2 = Verbruik dal
-  else if (sscanf(line, "1-0:1.8.2(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:1.8.2(%lf", &result) == 1) {
     meterReading.powerDeliverLow = resultToInt(result);
   }
 
   // 1-0:2.8.1 = Injectie piek
-  else if (sscanf(line, "1-0:2.8.1(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:2.8.1(%lf", &result) == 1) {
     meterReading.powerReturnHigh = resultToInt(result);
   }
 
   // 1-0:2.8.2 = Injectie dal
-  else if (sscanf(line, "1-0:2.8.2(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:2.8.2(%lf", &result) == 1) {
     meterReading.powerReturnLow = resultToInt(result);
   }
 

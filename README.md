@@ -14,6 +14,9 @@ With this shield and library you are able to:
 - Read power imported from grid during off-peak hours
 - Read gas used
 
+## Added in version 1.3.7
+- Fixed double parsing
+
 ## Added in version 1.3.6
 - Fixed float overflow
 

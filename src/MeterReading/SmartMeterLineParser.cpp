@@ -23,7 +23,7 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
   // 1-0:1.7.0 = Huidig verbruik
   // @TEST: smartMeterLineParser_IskraME382_parseCurrentPowerDeliver
   // @TEST: smartMeterLineParser_IskraAM550_parseCurrentPowerDeliver
-  else if (sscanf(line, "1-0:1.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:1.7.0(%lf", &result) == 1) {
     auto shortage = resultToInt(result);
     if (shortage > 0) {
       meterReading.powerUsage = shortage;
@@ -33,7 +33,7 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
   // 1-0:2.7.0 = Huidig teruglever
   // @TEST: smartMeterLineParser_IskraME382_parseCurrentPowerReturn
   // @TEST: smartMeterLineParser_IskraAM550_parseCurrentPowerReturn
-  else if (sscanf(line, "1-0:2.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:2.7.0(%lf", &result) == 1) {
     auto oversupply = resultToInt(result);
     if (oversupply > 0) {
       meterReading.powerUsage = -oversupply;
@@ -42,59 +42,59 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
 
 
   // Amps line 1 / 3
-  else if (sscanf(line, "1-0:31.7.0(%f*A", &result) == 1) {
+  else if (sscanf(line, "1-0:31.7.0(%lf*A", &result) == 1) {
     meterReading.currentL1 = result;
   }
-  else if (sscanf(line, "1-0:51.7.0(%f*A", &result) == 1) {
+  else if (sscanf(line, "1-0:51.7.0(%lf*A", &result) == 1) {
     meterReading.currentL2 = result;
   }
-  else if (sscanf(line, "1-0:71.7.0(%f*A", &result) == 1) {
+  else if (sscanf(line, "1-0:71.7.0(%lf*A", &result) == 1) {
     meterReading.currentL3 = result;
   }
 
   // Voltages line 1 / 3
-  else if (sscanf(line, "1-0:32.7.0(%f*V", &result) == 1) {
+  else if (sscanf(line, "1-0:32.7.0(%lf*V", &result) == 1) {
     meterReading.voltageL1 = result;
   }
-  else if (sscanf(line, "1-0:52.7.0(%f*V", &result) == 1) {
+  else if (sscanf(line, "1-0:52.7.0(%lf*V", &result) == 1) {
     meterReading.voltageL2 = result;
   }
-  else if (sscanf(line, "1-0:72.7.0(%f*V", &result) == 1) {
+  else if (sscanf(line, "1-0:72.7.0(%lf*V", &result) == 1) {
     meterReading.voltageL3 = result;
   }
 
   // Power line 1 / 3
-  else if (sscanf(line, "1-0:21.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:21.7.0(%lf", &result) == 1) {
     auto shortage = resultToInt(result);
     if (shortage > 0) {
       meterReading.powerL1 = shortage;
     }
   }
-  else if (sscanf(line, "1-0:22.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:22.7.0(%lf", &result) == 1) {
     auto oversupply = resultToInt(result);
     if (oversupply > 0) {
       meterReading.powerL1 = -oversupply;
     }
   }
-  else if (sscanf(line, "1-0:41.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:41.7.0(%lf", &result) == 1) {
     auto shortage = resultToInt(result);
     if (shortage > 0) {
       meterReading.powerL2 = shortage;
     }
   }
-  else if (sscanf(line, "1-0:42.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:42.7.0(%lf", &result) == 1) {
     auto oversupply = resultToInt(result);
     if (oversupply > 0) {
       meterReading.powerL2 = -oversupply;
     }
   }
-  else if (sscanf(line, "1-0:61.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:61.7.0(%lf", &result) == 1) {
     auto shortage = resultToInt(result);
     if (shortage > 0) {
       meterReading.powerL3 = shortage;
     }
   }
-  else if (sscanf(line, "1-0:62.7.0(%f", &result) == 1) {
+  else if (sscanf(line, "1-0:62.7.0(%lf", &result) == 1) {
     auto oversupply = resultToInt(result);
     if (oversupply > 0) {
       meterReading.powerL3 = -oversupply;

@@ -14,7 +14,7 @@ With this shield and library you are able to:
 - Read power imported from grid during off-peak hours
 - Read gas used
 
-## Added in version 1.3.9
+## Added in version 1.3.10
 - Fixed buffer size setting
 
 ## Added in version 1.3.9

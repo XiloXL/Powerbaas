@@ -17,6 +17,9 @@ With this shield and library you are able to:
 ## Added in version 1.3.9
 - Fixed buffer size setting
 
+## Added in version 1.3.9
+- Fixed buffer size setting
+
 ## Added in version 1.3.8
 - Fixed double parsing some more
 

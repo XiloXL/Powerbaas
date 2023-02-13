@@ -12,6 +12,9 @@ void SmartMeterAdapter::setupSerialAndBaudrate(uint8_t serialMode) {
   _smartMeter.end();
   delay(100);
 
+  // default 256, need more for longer lines!
+  _smartMeter.setRxBufferSize(1024);
+
   if(_serialMode == 0) {
     _smartMeter.begin(115200, SERIAL_8N1, 16, 17, true);
   } else if(_serialMode == 1) {
@@ -19,9 +22,6 @@ void SmartMeterAdapter::setupSerialAndBaudrate(uint8_t serialMode) {
   } else if(_serialMode == 2) {
     _smartMeter.begin(115200, SERIAL_7E1, 16, 17, true);
   }
-
-  // default 256, need more for longer lines!
-  _smartMeter.setRxBufferSize(1024);
 
   _state = SmartMeterState::idle;
 }

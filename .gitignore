@@ -1,1 +1,6 @@
 /Powerbaas.ino
+library.properties
+.idea/modules.xml
+.gitignore
+.idea/vcs.xml
+.idea/Powerbaas.iml

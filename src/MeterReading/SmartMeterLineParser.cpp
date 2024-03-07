@@ -24,10 +24,12 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
   // @TEST: smartMeterLineParser_IskraME382_parseCurrentPowerDeliver
   // @TEST: smartMeterLineParser_IskraAM550_parseCurrentPowerDeliver
   else if (sscanf(line, "1-0:1.7.0(%lf", &result) == 1) {
+    meterReading.powerUsage = 0;
     auto shortage = resultToInt(result);
     if (shortage > 0) {
       meterReading.powerUsage = shortage;
     }
+    return;
   }
 
   // 1-0:2.7.0 = Huidig teruglever
@@ -36,8 +38,9 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
   else if (sscanf(line, "1-0:2.7.0(%lf", &result) == 1) {
     auto oversupply = resultToInt(result);
     if (oversupply > 0) {
-      meterReading.powerUsage = -oversupply;
+      meterReading.powerUsage = (meterReading.powerUsage - oversupply);
     }
+    return;
   }
 
 

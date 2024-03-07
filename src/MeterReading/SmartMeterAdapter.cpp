@@ -36,6 +36,8 @@ void SmartMeterAdapter::receive(const MeterReadingCallback& onMeterReading) {
 
     _lastTelegramCharacter = _smartMeter.read();
 
+    Serial.print(_lastTelegramCharacter);
+
     // Fill buffer up to and including a new line (\n)
     _telegramLine[_telegramIndex] = _lastTelegramCharacter&127;
     _telegramIndex++;

@@ -75,7 +75,7 @@ void loop() {
 
 String statusJson() {
   String json = "{\r\n  \"meterReading\": {";
-  json += "\r\n    \"timestamp\": " + String(meterReading.timestamp);
+  json += "\r\n    \"timestamp\": \"" + meterReading.timestamp + "\"";
   json += ",\r\n    \"powerUsage\": " + String(meterReading.powerUsage);
   json += ",\r\n    \"powerDeliverHigh\": " + String(meterReading.powerDeliverHigh);
   json += ",\r\n    \"powerDeliverLow\": " + String(meterReading.powerDeliverLow);

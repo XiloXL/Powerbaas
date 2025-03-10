@@ -14,6 +14,9 @@ With this shield and library you are able to:
 - Read power imported from grid during off-peak hours
 - Read gas used
 
+## Added in version 1.3.13
+- Fixed a bug in HomeAutomation example json formatting
+
 ## Added in version 1.3.12
 - Fixed a bug in HomeAutomation example json formatting
 

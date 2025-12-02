@@ -88,6 +88,9 @@ String statusJson() {
   json += ",\r\n    \"currentL1\": " + String(meterReading.currentL1);
   json += ",\r\n    \"currentL2\": " + String(meterReading.currentL2);
   json += ",\r\n    \"currentL3\": " + String(meterReading.currentL3);
+  json += ",\r\n    \"powerUsageL1\": " + String(meterReading.powerL1);
+  json += ",\r\n    \"powerUsageL2\": " + String(meterReading.powerL2);
+  json += ",\r\n    \"powerUsageL3\": " + String(meterReading.powerL3);
   json += "\r\n  }";
   json += "\r\n}";
 

@@ -4,6 +4,9 @@
 Powerbaas Arduino library for smart meter P1 DIY module<br />
 You can order your P1 Powerbaas DIY module on https://www.powerbaas.nl
 
+## Added in version 1.3.15
+- Fixed a bug in Gas parsing on newest Belgian smart meters
+
 ## Added in version 1.3.14
 - Added powerUsageL1/2/3
 

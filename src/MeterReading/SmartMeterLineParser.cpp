@@ -104,6 +104,41 @@ void SmartMeterLineParser::parse(char* line, MeterReading& meterReading) {
     }
   }
 
+  // MBUS  devices
+  uint8_t mbusDevice = 0;
+  uint8_t mbusDeviceType = 0;
+  if (sscanf(line, "0-%u:24.1.0(%u)", &mbusDevice, &mbusDeviceType) == 2) {
+    _currentMbusDevice = mbusDevice;
+    _currentMbusDeviceType = mbusDeviceType;
+  }
+
+  // 0-?:24.2.1 = MBUS Gas meter 1 tm 4 - Summer/Winter
+  uint8_t discardGas2 = 0;
+  uint8_t discardGas3 = 0;
+  if (sscanf(line, "0-%u:24.2.1(%ld%c)(%lf*m3", &mbusDevice, &discardGas2, &discardGas3, &result) == 4) {
+    if(mbusDevice == _currentMbusDevice && _currentMbusDeviceType == 3) {
+        meterReading.gas = resultToInt(result);
+        _currentMbusDeviceType = 0;
+    }
+    return;
+  }
+
+  // Fallback Gas DSMR2.2
+  // @TEST: smartMeterLineParser_IskraME382_parseGas
+  if (sscanf(line, "(%lf)", &result) == 1) {
+    meterReading.gas = resultToInt(result);
+    return;
+  }
+
+  // Fallback Gas Belgium LGF5E360
+  if (sscanf(line, "0-%u:24.2.3(%ld%c)(%lf*m3", &mbusDevice, &discardGas2, &discardGas3, &result) == 4) {
+    if(mbusDevice == _currentMbusDevice && _currentMbusDeviceType == 3) {
+      meterReading.gas = resultToInt(result);
+      _currentMbusDeviceType = 0;
+    }
+    return;
+  }
+
   // parse country differences
   if(_isBelgium) {
     parseBelgium(line, meterReading);
@@ -135,32 +170,6 @@ void SmartMeterLineParser::parseNetherlands(char* line, MeterReading& meterReadi
   else if (sscanf(line, "1-0:2.8.2(%lf", &result) == 1) {
     meterReading.powerReturnHigh = resultToInt(result);
   }
-
-  // MBUS  devices
-  uint8_t mbusDevice = 0;
-  uint8_t mbusDeviceType = 0;
-  if (sscanf(line, "0-%u:24.1.0(%u)", &mbusDevice, &mbusDeviceType) == 2) {
-    _currentMbusDevice = mbusDevice;
-    _currentMbusDeviceType = mbusDeviceType;
-  }
-
-  // 0-?:24.2.1 = MBUS Gas meter 1 tm 4 - Summer/Winter
-  uint8_t discardGas2 = 0;
-  uint8_t discardGas3 = 0;
-  if (sscanf(line, "0-%u:24.2.1(%ld%c)(%lf*m3", &mbusDevice, &discardGas2, &discardGas3, &result) == 4) {
-    if(mbusDevice == _currentMbusDevice && _currentMbusDeviceType == 3) {
-        meterReading.gas = resultToInt(result);
-        _currentMbusDeviceType = 0;
-    }
-    return;
-  }
-
-  // Fallback Gas DSMR2.2
-  // @TEST: smartMeterLineParser_IskraME382_parseGas
-  if (sscanf(line, "(%lf)", &result) == 1) {
-    meterReading.gas = resultToInt(result);
-    return;
-  }
 }
 
 void SmartMeterLineParser::parseBelgium(char* line, MeterReading& meterReading) {
@@ -186,26 +195,6 @@ void SmartMeterLineParser::parseBelgium(char* line, MeterReading& meterReading) 
   // 1-0:2.8.2 = Injectie dal
   else if (sscanf(line, "1-0:2.8.2(%lf", &result) == 1) {
     meterReading.powerReturnLow = resultToInt(result);
-  }
-
-  // MBUS  devices
-  uint8_t mbusDevice = 0;
-  uint8_t mbusDeviceType = 0;
-  if (sscanf(line, "0-%u:24.1.0(%u)", &mbusDevice, &mbusDeviceType) == 2) {
-    _currentMbusDevice = mbusDevice;
-    _currentMbusDeviceType = mbusDeviceType;
-  }
-
-  // 0-?:24.2.1 = Gas meter 1 tm 4 - Summer/Winter
-  // @TEST: smartMeterLineParser_Belgium_parseGas
-  uint8_t discardGas2 = 0;
-  uint8_t discardGas3 = 0;
-  if (sscanf(line, "0-%u:24.2.3(%ld%c)(%lf*m3", &mbusDevice, &discardGas2, &discardGas3, &result) == 4) {
-    if(mbusDevice == _currentMbusDevice && _currentMbusDeviceType == 3) {
-      meterReading.gas = resultToInt(result);
-      _currentMbusDeviceType = 0;
-    }
-    return;
   }
 }
 
